@@ -27,11 +27,18 @@ public class ObrasPanel extends javax.swing.JPanel {
     public ObrasPanel() {
         initComponents();
         cargarObras();
-        cargarEmpleadosDisponibles();
+        cargarEmpleados();
         cargarObrasYEmpleados();
     }
 
-    
+    public void refrescarTablaEmpleados() {
+    cargarObrasYEmpleados();
+    cargarEmpleados();
+    tablaObrasYEmpleados.revalidate();
+    tablaObrasYEmpleados.repaint();
+    tablaEmpleados.revalidate();
+    tablaEmpleados.repaint();
+    }
    
     void cargarObras (){
         
@@ -65,7 +72,7 @@ public class ObrasPanel extends javax.swing.JPanel {
     }
     
        //Cargar empleados disponibles
-    void cargarEmpleadosDisponibles (){
+    void cargarEmpleados (){
         
      UsuarioDAO dao = new UsuarioDAO();
     Response<Usuario> resp = dao.readAll();
@@ -88,6 +95,8 @@ public class ObrasPanel extends javax.swing.JPanel {
         }
 
         tablaEmpleados.setModel(model);
+        tablaEmpleados.revalidate();
+        tablaEmpleados.repaint();
 
     } else {
         JOptionPane.showMessageDialog(this, "Error al cargar empleados: " + resp.getMessage());
@@ -99,6 +108,7 @@ private final ObraControlador obraCtrl = new ObraControlador();
 
           // Cargar tabla "Obras y Empleados"
 private void cargarObrasYEmpleados() {
+    ObraControlador obraCtrl = new ObraControlador();
     Response<Obra> resp = obraCtrl.listarObras();
 
     if (resp.isSuccess() && resp.getData() != null) {
@@ -123,6 +133,8 @@ private void cargarObrasYEmpleados() {
         }
 
         tablaObrasYEmpleados.setModel(model);
+        tablaObrasYEmpleados.revalidate();
+        tablaObrasYEmpleados.repaint();
     } else {
         JOptionPane.showMessageDialog(this,
             "Error al cargar obras y empleados: " + (resp.getMessage() != null ? resp.getMessage() : "Sin datos"),
@@ -173,10 +185,8 @@ private void asignarEmpleado() {
         JOptionPane.showMessageDialog(this, resp.getMessage());
         cargarObrasYEmpleados();
     }
-
-
     
-
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -592,6 +602,7 @@ private void asignarEmpleado() {
             jTextField7.setText("");
             
             //Recargar la tabla de obras
+            refrescarTablaEmpleados();
             cargarObras();
             
         } else {
@@ -662,6 +673,7 @@ private void asignarEmpleado() {
             jTextField7.setText("");
             
             //recargar la tabla de obras
+            refrescarTablaEmpleados();
             cargarObras();
         } else {
             JOptionPane.showMessageDialog(this, "Error: " + response.getMessage());
@@ -703,6 +715,7 @@ private void asignarEmpleado() {
                 JOptionPane.showMessageDialog(this, "Obra eliminada correctamente.");
                 
                 //Recargar la tabla de obras
+                refrescarTablaEmpleados();
                 cargarObras(); 
                 
                 //Limpiar los campos de texto

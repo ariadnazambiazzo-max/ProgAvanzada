@@ -15,10 +15,13 @@ import modelo.Response;
 public class EmpleadosPanel extends javax.swing.JPanel {
 
     
-    public EmpleadosPanel() {
-        initComponents();
-        cargarEmpleados();
-    }
+    private ObrasPanel obrasPanel;
+
+    public EmpleadosPanel(ObrasPanel obrasPanel) {
+    initComponents();
+    this.obrasPanel = obrasPanel;
+    cargarEmpleados();
+}
 
   void cargarEmpleados (){
         
@@ -445,6 +448,11 @@ public class EmpleadosPanel extends javax.swing.JPanel {
             
             //Recargar la tabla empleados
             cargarEmpleados();
+            
+            // Actualizar tabla de obras 
+        if (obrasPanel != null) {
+            obrasPanel.refrescarTablaEmpleados();
+        }
         } else {
             JOptionPane.showMessageDialog(this, "Error: " + response.getMessage());
         }
@@ -514,6 +522,9 @@ public class EmpleadosPanel extends javax.swing.JPanel {
             
             //Recargar la tabla de empleados
             cargarEmpleados();
+            if (obrasPanel != null) {
+            obrasPanel.refrescarTablaEmpleados();
+            }
             
         } else {
             JOptionPane.showMessageDialog(this, "Error: " + response.getMessage());

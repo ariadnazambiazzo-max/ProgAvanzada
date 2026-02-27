@@ -9,6 +9,7 @@ import java.util.List;
 
 import modelo.Obra;
 import modelo.Response;
+import modelo.Empleado;
 
 
 public class ObraDAO extends BaseDAO<Obra> {
@@ -113,30 +114,54 @@ public class ObraDAO extends BaseDAO<Obra> {
     }
 
     @Override
-    public Response<Obra> readAll() {
-        List<Obra> lista = new ArrayList<>();
-        String sql = "SELECT * FROM obra";
+public Response<Obra> readAll() {
+    List<Obra> lista = new ArrayList<>();
+    String sql = "SELECT * FROM obra";
 
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
+    try (Connection conn = getConnection();
+         PreparedStatement stmt = conn.prepareStatement(sql);
+         ResultSet rs = stmt.executeQuery()) {
 
-            while (rs.next()) {
-                Obra o = new Obra();
-                o.setId(rs.getInt("id"));
-                o.setNombre(rs.getString("nombre"));
-                o.setUbicacion(rs.getString("ubicacion"));
-                o.setFechaInicio(rs.getDate("fechaInicio"));
-                o.setFechaFin(rs.getDate("fechaFin"));
-                o.setPresupuesto(rs.getDouble("presupuesto"));
-                o.setEstado(rs.getString("estado"));
-                lista.add(o);
+        while (rs.next()) {
+            Obra o = new Obra();
+            o.setId(rs.getInt("id"));
+            o.setNombre(rs.getString("nombre"));
+            o.setUbicacion(rs.getString("ubicacion"));
+            o.setFechaInicio(rs.getDate("fechaInicio"));
+            o.setFechaFin(rs.getDate("fechaFin"));
+            o.setPresupuesto(rs.getDouble("presupuesto"));
+            o.setEstado(rs.getString("estado"));
+
+            // Traer empleados asignados
+            String sqlEmp = "SELECT u.id, u.nombre, u.contrasenia, u.dni, u.tipo " +
+                            "FROM usuario u " +
+                            "INNER JOIN obra_empleado oe ON u.id = oe.empleado_id " +
+                            "WHERE oe.obra_id = ?";
+            try (PreparedStatement psEmp = conn.prepareStatement(sqlEmp)) {
+                psEmp.setInt(1, o.getId());
+                try (ResultSet rsEmp = psEmp.executeQuery()) {
+                    List<Empleado> empleados = new ArrayList<>();
+                    while (rsEmp.next()) {
+                        Empleado emp = new Empleado();
+                        emp.setId(rsEmp.getInt("id"));
+                        emp.setNombre(rsEmp.getString("nombre"));
+                        emp.setContrasenia(rsEmp.getString("contrasenia"));
+                        emp.setDni(rsEmp.getInt("dni"));
+                        emp.setTipo(rsEmp.getString("tipo"));
+                        // opcional: cargar asistencias si querés
+                        empleados.add(emp);
+                    }
+                    o.setEmpleados(empleados);
+                }
             }
 
-            return new Response<>(true, "200", "Obras obtenidas", lista);
-
-        } catch (SQLException e) {
-            return new Response<>(false, "500", e.getMessage());
+            lista.add(o);
         }
+
+        return new Response<>(true, "200", "Obras obtenidas", lista);
+
+    } catch (SQLException e) {
+        return new Response<>(false, "500", e.getMessage());
     }
+}
 }

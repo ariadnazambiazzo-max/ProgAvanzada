@@ -17,7 +17,7 @@ public class Index extends javax.swing.JFrame {
         initComponents();
         
         ObrasPanel op = new ObrasPanel();
-        EmpleadosPanel ep = new EmpleadosPanel();
+        EmpleadosPanel ep = new EmpleadosPanel(op);
         MaterialesPanel mp = new MaterialesPanel();
         MaquinasPanel map = new MaquinasPanel();
         
