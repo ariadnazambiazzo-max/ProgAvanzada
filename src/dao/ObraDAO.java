@@ -94,24 +94,35 @@ public class ObraDAO extends BaseDAO<Obra> {
     }
 
     @Override
-    public Response<Obra> delete(int id) {
-        String sql = "DELETE FROM obra WHERE id = ?";
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+public Response<Obra> delete(int id) {
 
-            stmt.setInt(1, id);
-            int filas = stmt.executeUpdate();
+    String sqlRelaciones = "DELETE FROM obra_empleado WHERE obra_id = ?";
+    String sqlObra = "DELETE FROM obra WHERE id = ?";
+
+    try (Connection conn = getConnection()) {
+
+        // 1️⃣ Borrar relaciones primero
+        try (PreparedStatement stmtRel = conn.prepareStatement(sqlRelaciones)) {
+            stmtRel.setInt(1, id);
+            stmtRel.executeUpdate();
+        }
+
+        // 2️⃣ Borrar obra
+        try (PreparedStatement stmtObra = conn.prepareStatement(sqlObra)) {
+            stmtObra.setInt(1, id);
+            int filas = stmtObra.executeUpdate();
 
             if (filas > 0) {
-                return new Response<>(true, "200", "Obra eliminada exitosamente");
+                return new Response<>(true, "200", "Obra eliminada correctamente");
             } else {
                 return new Response<>(false, "404", "Obra no encontrada");
             }
-
-        } catch (SQLException e) {
-            return new Response<>(false, "500", e.getMessage());
         }
+
+    } catch (SQLException e) {
+        return new Response<>(false, "500", e.getMessage());
     }
+}
 
     @Override
 public Response<Obra> readAll() {

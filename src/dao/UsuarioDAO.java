@@ -82,23 +82,35 @@ public class UsuarioDAO extends BaseDAO<Usuario> {
     }
 
     @Override
-    public Response<Usuario> delete(int id) {
-        String sql = "DELETE FROM usuario WHERE id = ?";
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+public Response<Usuario> delete(int id) {
 
-            stmt.setInt(1, id);
-            int filas = stmt.executeUpdate();
-            if (filas > 0) {
-                return new Response<>(true, "200", "Usuario eliminado");
-            } else {
-                return new Response<>(false, "404", "Usuario no encontrado");
-            }
+    String sqlRelaciones = "DELETE FROM obra_empleado WHERE empleado_id = ?";
+    String sqlEmpleado = "DELETE FROM usuario WHERE id = ?";
 
-        } catch (SQLException e) {
-            return new Response<>(false, "500", e.getMessage());
+    try (Connection conn = getConnection()) {
+
+        // 1️⃣ Borrar relaciones
+        try (PreparedStatement stmtRel = conn.prepareStatement(sqlRelaciones)) {
+            stmtRel.setInt(1, id);
+            stmtRel.executeUpdate();
         }
+
+        // 2️⃣ Borrar empleado
+        try (PreparedStatement stmtEmp = conn.prepareStatement(sqlEmpleado)) {
+            stmtEmp.setInt(1, id);
+            int filas = stmtEmp.executeUpdate();
+
+            if (filas > 0) {
+                return new Response<>(true, "200", "Empleado eliminado correctamente");
+            } else {
+                return new Response<>(false, "404", "Empleado no encontrado");
+            }
+        }
+
+    } catch (SQLException e) {
+        return new Response<>(false, "500", e.getMessage());
     }
+}
 
     @Override
     public Response<Usuario> readAll() {

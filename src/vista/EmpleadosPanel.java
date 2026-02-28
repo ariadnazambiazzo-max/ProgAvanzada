@@ -557,6 +557,12 @@ public class EmpleadosPanel extends javax.swing.JPanel {
             jTextField3.setText("");
             jTextField4.setText("");
             jTextField5.setText("");
+            
+            //Recargar la tabla de empleados
+            cargarEmpleados();
+            if (obrasPanel != null) {
+            obrasPanel.refrescarTablaEmpleados();
+            }
     } else {
         JOptionPane.showMessageDialog(this, "Error: " + response.getMessage());
     }                    
